@@ -1,0 +1,166 @@
+\section{Compressive Sensing}
+\label{sec:compressive-sensing}
+
+The amount of data being collected in the world each day is rapidly increasing. Extracting useful information from the constantly growing streams of data is difficult and analysing it efficiently is even more challenging. The sheer volume of data collected on a daily basis means that most must be discarded before it can be used. This effect has been described by Richard Baranuik as the data deluge.
+
+A good example of this deluge can be found by considering digital cameras. Over the last twenty years, the number of pixels in standard commercially-available cameras has increased dramatically from less than one mega pixel (1MP) in the early nineties to over 12MP today. In order to share photographs over the Internet the user needs to compress the images into a more usable form. Compression techniques such as JPEG2000 have substantially improved over the years, which has resulted in compressions that look very similar to the original image but only require a fraction of the data storage. Collecting images of such high quality only to compress them later is a wasteful and inefficient use of computing resources. A more efficient method is to measure a compressed version of the image directly; compressive sensing can offer this.  
+
+The Shannon-Nyquist theorem, named after Claude Shannon and Harry Nyquist, allows analogue signals to be digitally sampled and later restored back to an analogue signal accurately. In order for the signal to be reconstructed uniquely from its digital sample, it must be sampled at a rate  above the Nyquist Sampling frequency. This frequency is defined to be twice the bandwidth of the signal, where the bandwidth refers to the highest frequency present in the signal. 
+
+Recent work by Emmanuel Cand{\`e}s, Terrence Tao and Justin Romberg in \cite{candes2006robust} has led to the exciting discovery that there is a way to accurately sample a signal at a much lower frequency than the Nyquist frequency, provided that the signal that you are trying to sample is compressible.
+
+This section discusses what is required of a signal for it to have this compressible property; briefly explains how compressive sensing works and discusses its relevance to background subtraction. 
+%and review some papers that also discuss compressive sensing with background subtraction. 
+
+\subsection{What is Compressive Sensing?}
+\label{sec:what-compr-sens}
+
+Compressive sensing as seen in \cite{baraniuk2007compressive}, is a method of reducing the amount of data collected from a signal without compromising the ability to later reconstruct the signal accurately.
+
+Compressive sensing is different from classical sampling in a number of ways. The two main differences are the manner in which measurements are acquired, and how the signal is reconstructed from these measurements.
+
+ In classical sampling, measurements are taken at equidistant intervals at a frequency above the Nyquist frequency. In contrast, in compressive sensing we sample at randomly spaced intervals in accordance with a sensing matrix $\Phi$, the choice of which is discussed in Section \ref{sec:choos-sens-matr}. 
+
+The method of signal reconstruction also differs between classical and compressive sensing. If the signal has been sampled in accordance with the Shannon-Nyquist theorem, one simply applies the Whittaker-Shannon interpolation formula in order to reconstruct the signal accurately. However, when dealing with compressed signals things are not so simple. We need to be able to determine the significant coefficients of some sparse representation of the signal and calculate a least squares approximation. This is not straightforward to calculate exactly in practice and instead an optimisation technique is used to get an optimal solution. The choice of this optimisation technique will be discussed further in Section \ref{sec:recovery-signal}.
+
+\subsubsection{Terminology}
+\label{sec:terminology}
+
+We shall refer to the signal being measured as the vector $\pmb{x} \in R^N$. When this is applied to images one simply vectorises the $N1 \times N2$ luminance matrix $\pmb{I_t}$ to return a vector $\pmb{x}$ of length $N = N1 \times N2$ for each $t$.
+
+Any signal in $R^N$ can be represented in terms of a basis of $N \times 1$ vectors $\psi_{i=1}^N$.  Using the $N \times N$ basis matrix $\pmb{\Psi}$ with the  vectors $\psi_i$ as columns, the signal $\pmb{x}$ can be expressed as in equation \eqref{eq:9}. 
+%
+\begin{equation}
+  \label{eq:9}
+  \pmb{x} = \pmb{\Psi} \pmb{s}
+\end{equation}
+%
+We can see that both $\pmb{x}$ and $\pmb{s}$ are representations of the signal, but $\pmb{x}$ is in the time domain and $\pmb{s}$ is in the $\pmb\Psi$ domain. The measurement taken of the signal $\pmb{x}$ will be referred to as the vector $\pmb{y} \in R^M$ where $M << N$. Let $\pmb\Phi \in R^{M \times N}$ be the measurement matrix by which the measurement vector $\pmb{y}$ is obtained as $\pmb{y} = \pmb\Phi \pmb{x}$. Although usually within linear algebra the problem of recovering $\pmb{x}$ from $\pmb{y}$ would give infinite solutions, if we know that the $\pmb{x}$ that we are looking to reconstruct is sparse this becomes possible.
+
+
+\subsubsection{Sparse and Compressible Signals}
+\label{sec:compressible-signals}
+A signal is known as being $K$-sparse if $\pmb{x} \in R^N$ can be represented as a linear combination of $K$ basis vectors. We are interested when $K$ is much smaller than $N$ as this means that most of the coefficients are non-zero. The signal of interest is usually not sparse but approximately sparse, which  is also known as compressible. If a signal is compressible we still require $K$ large coefficients (with $K << N$) but the remaining $N-K$ coefficients are only required to be small and not necessarily zero. Fundamentally a signal is compressible if most of the information in the signal is contained within a few coefficients. Luckily most real-world images have this compressible property once subjected to a wavelet transform and so the technique can be applied to real images and videos.   
+
+Figure \ref{fig:waveletcoeff} depicts a natural image and its corresponding  wavelet transform. The original image is not suitable for compressed sensing, but after being transformed it is in a compressible form. The lighter pixels in Figure \ref{fig:wt} represent large coefficients ($s$) from the wavelet transform and dark pixels represent small coefficients, so light areas determine where most of the information in the image is stored. We can see that there are lots of areas of dark in the Figure \ref{fig:wt} but only a few light areas, meaning that the image is compressible.
+
+\begin{figure}[h]
+  \centering
+   \begin{subfigure}[b]{0.4\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{manoriginal}
+                \caption{Original frame}
+        \end{subfigure}
+\quad
+\begin{subfigure}[b]{0.4\textwidth}
+                \centering
+                \includegraphics[width=\textwidth]{manwavelet}
+                \caption{Wavelet transformation}
+                \label{fig:wt}
+        \end{subfigure}
+  \caption{A natural image and its wavelet transform. In the wavelet transformation lighter pixels refer to large transform coefficients and dark areas refer to smaller coefficients. There are only few light areas but many dark ones which implies that the image is compressible. Figure originally appears in \cite{baraniuk2011introduction}.}
+  \label{fig:waveletcoeff}
+\end{figure}
+
+\subsection{The Theory of Compressive Sensing}
+\label{sec:theory-compr-sens}
+
+According to the framework developed in \cite{candes2006robust}, the measurement $\pmb{y}$ is a linear function of the signal $x$ as shown in equation \eqref{eq:1}. The number of measurements $M$ in the sample $y$ is assumed to be smaller than signal $x$, so we choose a measurement matrix $\Phi \in R^{M \times N}$ with $M < < N$. It is known from linear algebra that there are infinitely many vectors $\pmb{x}$ that can solve equation \eqref{eq:1}, but usually $x$ is the only sparse solution, provided that $M \geq 2K$. Therefore if $\pmb{x}$ is known in advance to be sparse, it can in theory be reconstructed exactly from $M$ measurements.
+%
+\begin{equation}
+  \label{eq:1}
+\pmb{y} =\pmb{\Phi x}
+\end{equation}
+%
+It is of vital importance that we are able to design a stable measurement matrix $\pmb{\Phi}$ so that the signal information is not damaged by the dimensional reduction from $\pmb{x} \in R^N$ to $\pmb{y} \in R^M$. We then need to reconstruct $\pmb{x}$ by using only the $M$ measurements of $\pmb{y}$. The creation of the sensing matrix $\pmb{\Phi}$ and recovery of the original signal $\pmb{x}$ will now be discussed in turn.
+
+\subsubsection{Choosing a Sensing Matrix}
+\label{sec:choos-sens-matr}
+
+The measurement matrix $\pmb{\Phi}$ needs to enable the signal $\pmb{x} \in R^N$ to be be reconstructed accurately from the measurement vector $\pmb{y} \in R^M$ . Assuming that $\pmb{x}$ is $K$-sparse, and that we know the location of these $K$ large coefficients, it is possible to reconstruct $\pmb{x}$ accurately for $M > K$, but a number of conditions must be true of the measurement matrix $\pmb{\Phi}$.
+
+In order for the reconstruction problem to be well-conditioned, it is necessary that ${\pmb{\Phi}}$ holds the Restricted Isometry Property (RIP) of order $2K$. 
+
+\begin{definition}
+  \label{def:1}
+  A matrix $\pmb{\Phi}$ satisfies the Restricted Isometry Property (RIP) of order $K$ if there exists a $\delta_K  \in (0,1)$ such that 
+\begin{equation}
+  \label{eq:4}
+  (1 - \delta_k)||\pmb{x}||^2_2 \leq||\pmb{\Phi} \pmb{x}||^2_2 \leq (1 + \delta_k)||\pmb{x}||^2_2,
+\end{equation}
+
+for all $\pmb{x} \in \sum_K = {\pmb{x}:||\pmb{x}||_0 \leq K} $. 
+\end{definition}
+
+If $\pmb{\Phi}$ satisfies the RIP with order $2K$, then $\pmb{\Phi}$ preserves the distance between any pair of $K$-sparse vectors.
+
+Another condition which is important is incoherence, which requires that the rows of $\pmb{\Phi}$ cannot sparsely represent the columns of $\pmb{\Psi}$, and vice versa the the rows of $\+\Psi$ cannot sparsely represent the columns of $\pmb{\Phi}$.
+
+Unfortunately, given some matrix $\pmb{A}$, the task of checking that it satisfies the RIP is a NP-hard problem. Fortunately both the RIP and incoherence will hold true with high probability if $\pmb{\Phi}$ is selected as random matrix. In order to construct $\pmb{\Phi}$ as such, we choose the entries $\phi_{i,j}$ as independent realisations of some probability distribution. A common choice is to let $\phi_{i,j}$ be iid Gaussian random variables with mean 0 and variance  $\frac{1}{N}$, but other distributions can be used.
+
+%One useful advantage of choosing  $\+\Phi$ randomly is that  $\+\Phi$ is universal. This means that 
+
+\subsubsection{Recovery of the signal}
+\label{sec:recovery-signal}
+
+The signal $\pmb{x}$ is reconstructed by applying some signal reconstruction algorithm to the vector of measurements $\pmb{y}$. There could be many possible solutions to equation \eqref{eq:1} as discussed above, so we wish to find the $K$-sparse solution. A classical approach to this reconstruction problem is to attempt to find the smallest $l_2$ norm or energy by solving
+%
+\begin{equation}
+  \label{eq:332}
+  \pmb{\hat{x}} = \mbox{argmin}||\pmb{x}||_2,
+\end{equation}
+%
+such that $\pmb{y} = \pmb{\phi x}$. Unfortunately this method rarely finds a K-space solution, which is what is required to correctly reconstruct the signal . In order to find a K-sparse solution, one must consider the $l_0$ norm. This norm counts the number of non-zero entries in $x$ and attempts to minimise them as shown,
+%
+\begin{equation}
+  \label{eq:335}
+  \pmb{\hat{x}} = \mbox{argmin}||\pmb{x}||_0,
+\end{equation}
+%
+such that $\pmb{y} = \pmb{\phi x}$. Using the $l_0$ norm, a K-sparse solution can be recovered with high probability using $M=K+1$ Gaussian measurements, but solving equation \eqref{eq:335} is very slow computationally. According to \cite{baraniuk2007compressive}, optimisation based on the $l_1$ norm can exactly recover $K$-sparse signals efficiently and closely approximate compressible signals with high probability using only $M  \geq cK log\frac{N}{K} $ iid Gaussian measurements. The $l_1$ norm sums all of the elements of a vector as shown in equation \eqref{eq:3}. The $l_1$ norm minimisation problem reduces to a linear program known as basis pursuit. Basis pursuit replaces the sparse approximation problem by a convex problem, making it possible to solve in a reasonable time frame.
+%
+\begin{equation}
+  \label{eq:3}
+  \pmb{\hat{x}} = \text{arg} min_{y = \phi x} ||\pmb{x}||_1
+\end{equation}
+%
+Although basis pursuit is a popular choice as a reconstruction algorithm many other options are available. The most popular method other than basis pursuit is a greedy algorithm discussed in \cite{tropp2007signal} called orthogonal matching pursuit (OMP). This method is often faster than basis pursuit due to its simplicity; it iteratively computes the local optimum solution in the hope that these will lead to the global optimum solution. 
+
+We will now discuss how compressed sensing can be applied to background subtraction. 
+
+\subsection{Compressive Sensing for Background Subtraction}
+\label{sec:compr-sens-backgr}
+In standard background subtraction algorithms such as the techniques discussed in Section \ref{sec:bgs}, the entire frame $\+{x}$ is sampled in full and once the foreground has been separated from the background, the background is either used to update the background model or simply discarded. This scenario seems ideal for the application of compressed sensing because it can be argued that we are unnecessarily over-sensing the input scene in order to throw it all away again. We know from the above section that natural images can be sparsely represented using wavelet transformations so it seems that compressed sensing can be applied to this application.
+
+A version of compressed sensing specifically for background subtraction was proposed in \cite{cevher2008compressive}, which claimed to directly recover the foreground of an image without sensing a high quality background model. 
+
+Every input image $\pmb{x}$ is modelled as the summation for the foreground and background as shown in equation \eqref{eq:6}.
+%
+\begin{equation}
+  \label{eq:6}
+  \pmb{x}_t = \pmb{f}_t +\pmb{ b}_t.
+\end{equation}
+%
+We assume that $\pmb{x}$ is sensed with a measurement matrix $\pmb{\Phi}$ which is chosen using a method as discussed in Section \ref{sec:choos-sens-matr} and so we now have a measurement vector $\pmb{y_t}$ such that 
+%
+\begin{equation}
+  \label{eq:7}
+ \pmb{y}_t = \pmb{\phi} \pmb{x}_t.
+\end{equation}
+%
+Now we choose some recovery procedure as discussed in Section \ref{sec:recovery-signal} which is represented by $\Delta(\pmb{\phi}, y)$. Cevher shows that in order to estimate the foreground we need to apply the recovery algorithm to the difference between the measurement vector  $\pmb{y}_t$ and the estimated background $\pmb{y}_t^b$, as in equation \eqref{eq:8}. This background is assumed to be known from an update procedure.  
+%
+\begin{equation}
+  \label{eq:8}
+ \pmb{ \hat{f}}_t = \Delta(\pmb{\phi}, \pmb{y}_t - \pmb{y}_t^b).
+\end{equation}
+%
+Throughout this procedure \cite{cevher2008compressive} chooses $\pmb{\Phi}$ beforehand, that this value is kept fixed throughout. This means that no matter which frame is being analysed, the number of measurements taken $M$ will remain constant. This is not always ideal as the sparsity of images will not remain constant throughout a video. If too few compressive measurements are calculated, the foreground estimation may not fully capture the true foreground, resulting in an unreliable foreground mask. Whilst if too many measurements are taken, the extra measurements will not improve the quality of the foreground estimation but we will have wasted measurements, making the algorithm inefficient. \cite{warnell2011compressive} proposed a modification to this algorithm which has a static background but the number of measurements taken in each frame is adaptive. This method is known as adaptive rate compressive sensing (ARCS). 
+
+%\subsection{Literature Review}
+%\label{sec:literature-review}
+
+%The existing approach for Compressive Sensing is unable to adapt the system data rate to scene activity. If too few measurements are taken, the signal will be poor yet too many are wasteful(computationally.) Sample then compress framework is not ideal because 1) N may be large even if K is small, 2) All the N transform co efficientgs $s_i$ must be calculated even though N-K of them will be discarded, 3) Need to know the location of the K largest coefficients.
+
+
+

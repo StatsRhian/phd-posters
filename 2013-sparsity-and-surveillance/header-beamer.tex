@@ -1,0 +1,121 @@
+% HEADER-BEAMER
+% specifically for use in presentations
+
+% a % sign means the rest of the line is ignored
+% modify page size and spacing at end
+
+% PREAMBLE
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{url}
+
+% format for environments follows
+% \newenvironment{name}{starting text}{finishing text}
+
+% matrix and determinant environments follow
+\newenvironment{mat}{\left[ \begin{array}}{\end{array} \right]}
+\newenvironment{deter}{\left| \begin{array}}{\end{array} \right|}
+
+% controls the way equations are numbered
+%\numberwithin{equation}{section}
+% format for lists follows
+% \begin{list}{label for items}{declarations} items in list \end{list}
+
+% lista, listr, listar, listq are list environments with
+% small letters, small roman numerals, arabic numerals and no item labels
+\newcounter{ctr}
+\newenvironment{lista}{\begin{list}{(\alph{ctr})}%
+{\usecounter{ctr}
+\setlength{\itemsep}{0mm} \setlength{\topsep}{-2mm}
+\setlength{\leftmargin}{3em}}}{\end{list}}
+
+\newcounter{ctr1}
+\newenvironment{listr}{\begin{list}{(\roman{ctr1})}%
+{\usecounter{ctr1}
+\setlength{\itemsep}{0mm} \setlength{\topsep}{-2mm}
+\setlength{\leftmargin}{3em}}}{\end{list}}
+
+\newcounter{ctr2}
+\newenvironment{listar}{\begin{list}{\arabic{ctr2}.}%
+{\usecounter{ctr2}
+\setlength{\itemsep}{0mm} \setlength{\topsep}{-2mm}
+\setlength{\leftmargin}{3em}}}{\end{list}}
+
+\newenvironment{listq}{\begin{list}{}%
+{
+\setlength{\itemsep}{0mm} \setlength{\topsep}{-2mm}
+\setlength{\leftmargin}{3em}}}{\end{list}}
+
+% environments for an example, examples or exercises follow
+
+\newenvironment{exercises}{\begin{trivlist} \item[]
+{\bf Exercises} \begin{enumerate}}{\end{enumerate} \end{trivlist}}
+
+
+% commands for number sets follow
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\LL}{\mathbb{L}}
+
+% commands for extra mathematical symbols follow
+\newcommand{\half}{\frac{1}{2}}
+\newcommand{\third}{\frac{1}{3}}
+\newcommand{\quarter}{\frac{1}{4}}
+\newcommand{\isimp}{\Leftarrow}
+\newcommand{\lsim}{\stackrel{<}{_\sim}}
+\newcommand{\gsim}{\stackrel{>}{_\sim}}
+\newcommand{\image}{\, {\rm im}\, }
+\newcommand{\rank}{\, {\rm r}\, }
+\newcommand{\domain}{\, {\rm dom}\, }
+\newcommand{\adjoint}{\, {\rm adj}\, }
+\newcommand{\signum}{\, {\rm sgn}\, }
+\newcommand{\cosec}{\, {\rm cosec}\, }
+\newcommand{\cis}{\, {\rm cis}\, }
+\newcommand{\sech}{\, {\rm sech}\, }
+\newcommand{\cosech}{\, {\rm cosech}\, }
+\newcommand{\trace}{\, {\rm trace}\, }
+\newcommand{\diag}{\, {\rm diag}\, }
+\newcommand{\tri}{\, {\rm tri}\, }
+\newcommand{\ud}{\, {\rm d} \kern-.015em }
+\newcommand{\const}{\! {\rm const.}\; }
+
+
+% the following commands need 1 or 2 arguments in { }
+\newcommand{\real}[1]{{\rm Re}\left( #1 \right)}
+\newcommand{\modulus}[1]{\left| \kern.05em #1 \kern.05em \right|}
+\newcommand{\norm}[1]{\left\| \kern.05em #1 \kern.05em \right\|}
+\newcommand{\inner}[1]{\left\langle \kern.05em #1 \kern.05em \right\rangle }
+\newcommand{\recip}[1]{\frac{1}{#1}}
+\newcommand{\seq}[1]{\left( #1 \right)}
+\newcommand{\set}[1]{\left\{ #1 \right\} }
+\newcommand{\spanof}[1]{\, {\rm span} \left\{ #1 \right\} }
+\newcommand{\limit}[2]{\stackrel{\lim }{_{ #1 \to #2 }}}
+\newcommand{\maxover}[1]{\stackrel{\max }{_{ #1 }}}
+\newcommand{\minover}[1]{\stackrel{\min }{_{ #1 }}}
+\newcommand{\dislim}[2]{\renewcommand{\arraystretch}{0.8}
+\begin{array}{c}\lim \\ #1 \to #2 \end{array}}
+\newcommand{\pdif}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pddif}[3]{\frac{\partial^2 #1}{\partial #2 \partial #3}}
+\newcommand{\dif}[2]{\frac{\ud #1}{\ud #2}}
+\newcommand{\ildif}[2]{{\rm d} #1/{{\rm d} #2 }}
+\newcommand{\ilpdif}[2]{\partial #1/{\partial #2 }}
+\newcommand{\ilpddif}[3]{\partial^2 #1/{\partial #2 \partial #3}}
+\newcommand{\seconddif}[2]{\frac{\ud^2 #1}{\ud #2^2}}
+\newcommand{\bm}[1]{\mbox{\protect\boldmath $ #1 $}}
+\newcommand{\bmzero}{\mbox{\bf 0}}
+\newcommand{\pick}[2]{\renewcommand{\arraystretch}{0.6}
+\left( \kern-.4em \begin{array}{c} #1 \\ #2 \end{array} \kern-.4em \right) }
+\newcommand{\e}[1]{{\textrm{e}}^{#1}}
+\newcommand{\cov}[1]{\, {\rm cov}\left( #1 \right) }
+\newcommand{\var}[1]{\, {\rm var}\left( #1 \right) }
+\newcommand{\PP}[1]{\mathbb{P}\left( #1 \right)}
+\newcommand{\EE}[1]{\mathbb{E} \left( #1 \right)}
+
+
+%END OF PREAMBLE
+
+
